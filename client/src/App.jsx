@@ -8,6 +8,7 @@ function App() {
   const [usersOnline, setUsersOnline] = useState(0)
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState("");
+  const [myId, setMyId] = useState()
 
   // Update nickname on server
   useEffect(() => {
@@ -54,6 +55,7 @@ function App() {
 
   return (
     <div className="App p-10 font-sans">
+      <button onClick={() => socket.emit("create_game")}>Make a room</button>
       <h2 className='absolute bottom-0 left-1/2 translate-x-[-50%] text-neutral-950/25'>{usersOnline} Online</h2>
       <div className="flex flex-col gap-4 max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center">Wybierz pokój</h1>

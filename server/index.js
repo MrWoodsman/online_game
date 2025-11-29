@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 
 const logger = require("./utils/logger");
+const {createUniqueId} = require('./utils/idGenerator')
 
 const app = express();
 app.use(cors());
@@ -27,26 +28,7 @@ const AVILABLE_COLORS = ["#ef4444", "#3b82f6", "#22c55e", "#eab308"];
 const connectedUsers = {};
 
 // --- WSZYSTKIE GRY ---
-const games = [
-  {
-    id: "dshdfjksjdfops",
-    name: "Testowy pokój",
-    createdAt: 1764274075,
-    players: ["WAEq5YNK_VaaOVTKAAAW"],
-  },
-  {
-    id: "dshdfjksjdfops",
-    name: "Testowy pokój #2",
-    createdAt: 1764274075,
-    players: ["WAEq5YNK_VaaOVTKAAAW", "fsaoifadjsop"],
-  },
-  {
-    id: "dshdfjksjdfops",
-    name: "Testowy pokój #2",
-    createdAt: 1764274075,
-    players: ["WAEq5YNK_VaaOVTKAAAW", "fsaoifadjsop", "fsaoifadjsop", "fsaoifadjsop"],
-  },
-];
+const games = {};
 
 // Helper: tworzenie gracza w grze
 const getNewGamePlayerState = (id, nickname) => ({
@@ -82,10 +64,32 @@ io.on("connection", (socket) => {
   };
 
   socket.emit("user_data", connectedUsers[socket.id]);
-  socket.emit("rooms_data", games);
+  socket.emit("rooms_data", Object.values(games));
 
   // Wysyłamy do wszystkich info o liczbie graczy online (opcjonalnie)
   io.emit("users_online", Object.values(connectedUsers).length);
+
+  socket.on('create_game', () => {
+    const newRoomId = createUniqueId(games)
+
+    const newRoom = {
+      id: newRoomId,
+      name: `${connectedUsers[socket.id].nickname} room`,
+      createdAt: Date.now(),
+      owner: socket.id,
+      players: [socket.id],
+      maxPlayers: 4
+    }
+
+    games[newRoomId] = newRoom
+
+    socket.join(newRoomId)
+    connectedUsers[socket.id].status = "IN_ROOM"
+
+    logger.room(`Stworzono pokoój o id: ${newRoomId}`)
+    socket.emit("rooms_data", Object.values(games));
+    return newRoom
+  })
 
   // B. USTAWIANIE NICKU (Zanim wejdzie do gry)
   socket.on("set_nickname", (nickname) => {
