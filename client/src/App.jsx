@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import socket from './socket';
 import { RoomCard } from './components/RoomCard';
 
 function App() {
+  const navigate = useNavigate();
   // POPRAWKA 1: Inicjalizuj pustym stringiem, żeby input nie był 'undefined' na starcie
   const [nickname, setNickname] = useState("");
   const [usersOnline, setUsersOnline] = useState(0)
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState("");
-  const [myId, setMyId] = useState()
+  // const [myId, setMyId] = useState()
 
   // Update nickname on server
   useEffect(() => {
@@ -53,9 +55,28 @@ function App() {
     };
   }, []);
 
+  const createNewGame = () => {
+    socket.emit("create_game", (response) => {
+      console.log("Odpowiedź na utworzenie pokoiu: ", response)
+
+      if (response.status === "ok") {
+        socket.emit('join_room', { room: response.roomId }, (responseJoin) => {
+          console.log("Odpowiedź na dołączenie: ", responseJoin);
+
+          if (responseJoin && !responseJoin.error) {
+            console.log("Sukces! Jestem w pokoju.", responseJoin.gameData);
+            navigate(`/room/${responseJoin.gameData.id}`);
+          } else {
+            console.error("Błąd dołączania:", responseJoin?.error);
+          }
+        })
+      }
+    })
+  }
+
   return (
     <div className="App p-10 font-sans">
-      <button onClick={() => socket.emit("create_game")}>Make a room</button>
+      <button onClick={() => createNewGame()}>Make a room</button>
       <h2 className='absolute bottom-0 left-1/2 translate-x-[-50%] text-neutral-950/25'>{usersOnline} Online</h2>
       <div className="flex flex-col gap-4 max-w-md mx-auto">
         <h1 className="text-2xl font-bold text-center">Wybierz pokój</h1>

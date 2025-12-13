@@ -1,11 +1,6 @@
 const logger = require("./utils/logger");
 const { createUniqueId } = require("./utils/idGenerator");
-const {
-  connectedUsers,
-  games,
-  getNewGamePlayerState,
-  createGame,
-} = require("./gameState");
+const { connectedUsers, games, getNewGamePlayerState, createGame } = require("./gameState");
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -27,7 +22,7 @@ module.exports = (io) => {
     // Wysyłamy do wszystkich info o liczbie graczy online (opcjonalnie)
     io.emit("users_online", Object.values(connectedUsers).length);
 
-    socket.on("create_game", () => {
+    socket.on("create_game", (callback) => {
       const newRoomId = createUniqueId(games);
 
       const newRoom = {
@@ -35,7 +30,7 @@ module.exports = (io) => {
         name: `${connectedUsers[socket.id].nickname} room`,
         createdAt: Date.now(),
         owner: socket.id,
-        players: [socket.id],
+        players: [],
         maxPlayers: 4,
       };
 
@@ -46,7 +41,11 @@ module.exports = (io) => {
 
       logger.room(`Stworzono pokoój o id: ${newRoomId}`);
       socket.emit("rooms_data", Object.values(games));
-      return newRoom;
+
+      callback({
+        status: "ok",
+        roomId: newRoomId,
+      });
     });
 
     // B. USTAWIANIE NICKU (Zanim wejdzie do gry)
@@ -64,9 +63,11 @@ module.exports = (io) => {
     });
 
     // C. DOŁĄCZANIE DO POKOJU
-    socket.on("join_room", ({ room }) => {
+    socket.on("join_room", ({ room }, callback) => {
       const user = connectedUsers[socket.id];
       if (!user) return;
+
+      // console.log(games);
 
       if (!games[room]) {
         games[room] = createGame();
@@ -88,10 +89,22 @@ module.exports = (io) => {
 
       const newGamePlayer = getNewGamePlayerState(socket.id, user.nickname);
 
-      game.players.push(newGamePlayer);
+      game.players.push(socket.id);
       socket.join(room);
 
       connectedUsers[socket.id].status = "IN_ROOM";
+      connectedUsers[socket.id].room = room;
+
+      // console.log(games);
+
+      logger.game;
+
+      callback({
+        status: "ok",
+        gameData: game,
+      });
+
+      socket.emit("rooms_data", Object.values(games));
 
       io.to(room).emit("room_data", {
         players: game.players,
@@ -103,27 +116,61 @@ module.exports = (io) => {
     socket.on("disconnect", () => {
       logger.player(`Rozłączono: ${socket.id}`);
 
+      // 1. Najpierw pobierz ID pokoju, w którym był gracz
+      const roomId = connectedUsers[socket.id];
+
+      // 2. Usuń gracza z ogólnej listy online
       delete connectedUsers[socket.id];
       io.emit("users_online", Object.values(connectedUsers).length);
 
-      for (const roomId in games) {
-        const game = games[roomId];
-        const playerIndex = game.players.findIndex((p) => p.id === socket.id);
+      // 3. Jeśli gracz nie był w żadnym pokoju (był w lobby), kończymy
+      if (!roomId) return;
 
-        if (playerIndex !== -1) {
-          game.players.splice(playerIndex, 1);
+      // 4. Pobierz obiekt pokoju z bazy gier
+      const room = games[roomId];
+
+      if (room) {
+        // --- USUWANIE GRACZA ---
+
+        // METODA A: Filter (Stwórz nową tablicę bez tego ID) - najczytelniejsza
+        room.players = room.players.filter((id) => id !== socket.id);
+
+        // LUB METODA B: Splice (Modyfikuj istniejącą) - wydajniejsza
+        /*
+        const index = room.players.indexOf(socket.id);
+        if (index !== -1) {
+            room.players.splice(index, 1);
+        }
+        */
+
+        // --- OBSŁUGA PUSTEGO POKOJU ---
+        if (room.players.length === 0) {
+          // Jeśli nikogo nie ma, usuwamy pokój, żeby nie śmiecić w pamięci
+          logger.room(`Usuwanie pustego pokoju: ${roomId}`);
+          delete games[roomId];
+        } else {
+          // --- POWIADOMIENIE POZOSTAŁYCH ---
+          // Jeśli ktoś został, musimy im powiedzieć, że lista graczy się zmieniła
+          // Opcjonalnie: Jeśli wyszedł właściciel (owner), przekaż koronę komuś innemu
+          if (room.owner === socket.id) {
+            room.owner = room.players[0]; // Nowym szefem zostaje pierwszy z listy
+          }
 
           io.to(roomId).emit("room_data", {
-            players: game.players,
-            room: roomId,
+            // lub "player_left"
+            players: room.players,
+            owner: room.owner,
+            roomId: roomId,
           });
-
-          if (game.players.length === 0) {
-            delete games[roomId];
-          }
-          break;
         }
       }
+    });
+
+    // Pobierz dane pokoju na podstawie id użytkownika
+    socket.on("get_room_data", (callback) => {
+      callback({
+        gameData: games[connectedUsers[socket.id].room],
+      });
     });
   });
 };
