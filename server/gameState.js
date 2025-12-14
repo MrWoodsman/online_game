@@ -19,6 +19,9 @@ const getNewGamePlayerState = (id, nickname) => ({
 
 // Model Gry
 const createGame = () => ({
+  id: null,
+  ownerId: null,
+  maxPlayers: 4,
   players: [],
   currentPlayerIndex: 0,
   status: "LOBBY",
