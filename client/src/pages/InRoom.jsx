@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { replace, useLocation, useNavigate } from "react-router-dom";
 import socket from "../socket";
 
 export const InRoom = () => {
@@ -67,7 +67,18 @@ export const InRoom = () => {
             }
             <div className="flex gap-4">
                 <button onClick={() => {
+                    socket.emit('games_quit', (response) => {
+                        if (!response) return
 
+                        if (response.status == 'bad') {
+                            console.error(response.msg)
+                        }
+
+                        if (response.status == 'ok') {
+                            console.log(response.msg, response.room)
+                            navigate('/', replace)
+                        }
+                    })
                 }} className="w-full p-4 bg-neutral-200 cursor-pointer">QUIT</button>
                 <button onClick={() => {
 

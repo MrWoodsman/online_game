@@ -118,7 +118,59 @@ module.exports = (io, socket) => {
   });
 
   // === OPUSZCZANIE POKOJU
-  socket.on("games_quit", (roomToJoin, callback) => {});
+  socket.on("games_quit", (callback) => {
+    const userData = connectedUsers[socket.id];
+    const roomToQuit = games[userData.gameId];
+    // Sprawdzanie danych
+    if (!userData) {
+      logger.error(`Błąd dołączania pokoju brak danych użytkownika ${socket.id}`);
+      callback({
+        status: "bad",
+        msg: "Błąd danych użytkownika",
+      });
+      return;
+    }
+    // Sprawdzanie danych
+    if (!roomToQuit) {
+      logger.error(`Błąd nie znaleziono pokoju do opuszczenia ${userData.nickname} - ${socket.id}`);
+      callback({
+        status: "bad",
+        msg: "Błąd danych o pokoju do opuszczenia",
+      });
+      return;
+    }
+
+    // 1. Usuwanie użytkownika z pokoju
+    roomToQuit.players = roomToQuit.players.filter((p) => p.id !== socket.id);
+    // 2. Sprawdzanie czy pokoj jest pusty
+    if (roomToQuit.players.length == 0) {
+      delete games[roomToQuit.id];
+    } else {
+      // 3. Jeśli wyszedł HOST przekaz korone komus innemu
+      if (roomToQuit.ownerId == socket.id) {
+        roomToQuit.ownerId = roomToQuit.players[0].id;
+      }
+      // 4. Wysłanie info do innych w pokoju
+      io.to(roomToQuit.id).emit("game_room_update", roomToQuit);
+      // 5. Wysłanie do wszystkich z lobby
+      io.emit("games_list_update", roomToQuit);
+    }
+
+    callback({
+      status: "ok",
+      msg: `Pomyślnie opuszczono pokój ${roomToQuit.id}`,
+      room: roomToQuit,
+    });
+
+    // // = INFORMOWANIE INNYCH W POKOJU =
+    // io.to(roomToJoin).emit("game_room_update", gameData);
+    // // = INFORMOWANIE INNYCH POZA POKOJEM =
+    // io.emit("games_list_update", games);
+    // = LOG =
+    logger.room(`${userData.nickname} - ${socket.id} opuszcza pokój ${roomToQuit.id}`);
+    // = UPDATE ADMIN =
+    brodcastUsersUpdateToAdmin(io);
+  });
 
   // === TWORZENIE POKOJU ===
   socket.on("games_create", (data, callback) => {
@@ -154,6 +206,8 @@ module.exports = (io, socket) => {
       room: games[roomId],
     });
 
+    // = INFORMOWANIE INNYCH POZA POKOJEM =
+    io.emit("games_list_update", games);
     // = LOG =
     logger.room(`Utworzono pokój: ${roomId} / Właściciel ${userData?.nickname} - ${socket.id}`);
     // = UPDATE ADMIN =
