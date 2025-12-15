@@ -145,6 +145,7 @@ module.exports = (io, socket) => {
     // 2. Sprawdzanie czy pokoj jest pusty
     if (roomToQuit.players.length == 0) {
       delete games[roomToQuit.id];
+      io.emit("games_list_update", roomToQuit);
     } else {
       // 3. Jeśli wyszedł HOST przekaz korone komus innemu
       if (roomToQuit.ownerId == socket.id) {
