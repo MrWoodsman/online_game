@@ -14,7 +14,7 @@ const server = http.createServer(app);
 // Konfiguracja Socket.io z CORS (react porst 5173 rozmawia z serwerem na 3001)
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
