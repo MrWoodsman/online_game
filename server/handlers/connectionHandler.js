@@ -9,7 +9,7 @@ module.exports = (io, socket) => {
 
     // Przesyłanie danych jakie otrzymał
     socket.emit("after_connection", {
-      status: "OK",
+      status: "ok",
       userData: defaultUserData,
     });
 

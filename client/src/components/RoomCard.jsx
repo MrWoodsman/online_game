@@ -1,7 +1,7 @@
 export const RoomCard = ({ room, isSelected, onSelect }) => {
 
     // 1. Sprawdzamy czy pokój jest pełny
-    const isFull = room.players.length >= 4;
+    const isFull = room.players.length >= room.maxPlayers;
 
     // 2. Określamy aktualny stan (priorytet: Full > Selected > Default)
     let state = 'default';
@@ -21,7 +21,7 @@ export const RoomCard = ({ room, isSelected, onSelect }) => {
     return (
         <div
             // 4. Obsługa kliknięcia: jeśli pełny, nie rób nic
-            onClick={() => !isFull && onSelect(room.name)}
+            onClick={() => !isFull && onSelect(room.id)}
             className={`
                 p-3 rounded-md border-2 transition-all duration-200 flex justify-between items-center 
                 ${styles[state]}
@@ -29,7 +29,7 @@ export const RoomCard = ({ room, isSelected, onSelect }) => {
         >
             <div className="flex flex-col">
                 <span className="font-semibold">
-                    {room.name}
+                    {room.name} {room.id}
                 </span>
                 {/* Opcjonalnie: Dodatkowy tekst informacyjny */}
                 {/* {state === 'full' && <span className="text-xs text-red-400 font-bold">PEŁNY</span>}
@@ -38,7 +38,7 @@ export const RoomCard = ({ room, isSelected, onSelect }) => {
 
             {/* Licznik graczy */}
             <span className={`font-mono font-bold ${isFull ? "text-neutral-400" : ""}`}>
-                {room.players.length}/4
+                {room.players.length}/{room.maxPlayers}
             </span>
         </div>
     )

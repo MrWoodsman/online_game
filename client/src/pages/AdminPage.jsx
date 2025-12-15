@@ -22,9 +22,8 @@ export const AdminPage = () => {
 
         return () => {
             socket.off("connect", joinAdminChannel);
-
-            socket.emit("user_leave_room", "ADMIN_ROOM");
-            socket.emit("user_update_status", "LOBBY");
+            // socket.emit("user_leave_room", "ADMIN_ROOM");
+            // socket.emit("user_update_status", "LOBBY");
         };
     }, []);
 
@@ -61,7 +60,7 @@ export const AdminPage = () => {
     return (
         <div className="grid grid-cols-2">
             <div>
-                <h1>Gracze</h1>
+                <h1>Gracze ({playersData ? Object.keys(playersData).length : 0})</h1>
                 {playersData && Object.values(playersData).map((player) => (
 
                     /* 2. Każdy element listy w React musi mieć unikalny klucz (key) */
@@ -89,9 +88,19 @@ export const AdminPage = () => {
                         <b>Owner ID:</b> {room.ownerId} <br />
                         <b>Owner Nickname:</b> {playersData[room.ownerId]?.nickname} <br />
                         <b>Max players:</b> {room.maxPlayers} <br />
-                        <b>Players:</b> {room.players.join(" ")} <br />
                         <b>Status:</b> {room.status} <br />
-
+                        <b>Players:</b> <br />
+                        {
+                            room.players.map((p, index) => (
+                                <div key={index} className="border border-neutral-200">
+                                    {
+                                        Object.entries(p).map(([key, value]) => (
+                                            <p key={key}><b>{key}:</b> {String(value)} </p>
+                                        ))
+                                    }
+                                </div>
+                            ))
+                        }
                     </div>
                 ))}
             </div>

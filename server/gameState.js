@@ -6,20 +6,16 @@ const connectedUsers = {};
 // --- WSZYSTKIE GRY ---
 const games = {};
 
-// Helper: tworzenie gracza w grze
-const getNewGamePlayerState = (id, nickname) => ({
+const createPlayerInGame = (id, nickname) => ({
   id: id,
   nickname: nickname,
-  color: "red",
-  money: 1500,
-  position: 0,
-  isJailed: false,
-  properties: [],
+  color: null,
 });
 
 // Model Gry
 const createGame = () => ({
   id: null,
+  name: null,
   ownerId: null,
   maxPlayers: 4,
   players: [],
@@ -31,6 +27,6 @@ module.exports = {
   AVILABLE_COLORS,
   connectedUsers,
   games,
-  getNewGamePlayerState,
+  createPlayerInGame,
   createGame,
 };

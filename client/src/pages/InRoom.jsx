@@ -1,28 +1,56 @@
-import { useEffect } from "react"
-import { useParams, useNavigate, replace } from "react-router-dom"
-
-import socket from "../socket"
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import socket from "../socket";
 
 export const InRoom = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
-    const { id } = useParams()
+    const [gameData, setGameData] = useState()
+
+    const roomId = location.state?.roomId;
 
     useEffect(() => {
-        socket.emit("get_room_data", (response) => {
+        console.log(roomId)
+        // === ZABEZPIECZENIE 1: BRAK STATE (WEJŚCIE Z LINKU) ===
+        if (!roomId) {
+            console.log("Brak roomId w state (bezpośredni link) - wyrzucam do lobby");
+            navigate("/", { replace: true }); // Używamy { replace: true }
+            return;
+        }
 
-            const serverRoomId = response?.gameData?.id;
-
-            if (serverRoomId != id) {
-                console.log(response)
-                navigate(`/`, replace);
+        socket.emit("check_room_access", roomId, (response) => {
+            // Jeśli serwer powie "NIE" (false) -> wyrzucamy
+            if (!response.access) {
+                navigate("/", { replace: true });
             }
-        })
-    }, [id, navigate])
+
+            setGameData(response.game)
+            console.log(response.game)
+        });
+    }, [roomId, navigate]);
+
+    useEffect(() => {
+        const handleUpdateRoom = (gameData) => {
+            setGameData(gameData)
+        }
+        socket.on('game_room_update', handleUpdateRoom)
+
+        return () => {
+            socket.off('game_room_update', handleUpdateRoom)
+        }
+    }, [])
 
     return (
         <div>
-            Jesteś w pokoju {id}
+            <h1>Jesteś w pokoju: {roomId}</h1>
+            {
+                gameData && gameData.players.map((player) => (
+                    <div key={player.id}>
+                        {player.nickname}
+                    </div>
+                ))
+            }
         </div>
-    )
-}
+    );
+};
