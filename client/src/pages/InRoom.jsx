@@ -11,25 +11,39 @@ export const InRoom = () => {
     const roomId = location.state?.roomId;
 
     useEffect(() => {
-        console.log(roomId)
-        // === ZABEZPIECZENIE 1: BRAK STATE (WEJŚCIE Z LINKU) ===
         if (!roomId) {
-            console.log("Brak roomId w state (bezpośredni link) - wyrzucam do lobby");
-            navigate("/", { replace: true }); // Używamy { replace: true }
+            console.log("Brak roomId - wyrzucam");
+            navigate("/", { replace: true });
             return;
         }
 
-        socket.emit("check_room_access", roomId, (response) => {
-            // Jeśli serwer powie "NIE" (false) -> wyrzucamy
-            if (!response.access) {
-                navigate("/", { replace: true });
-            }
+        const verifyAccess = () => {
+            console.log("Weryfikacja dostępu do pokoju...");
 
-            setGameData(response.game)
-            console.log(response.game)
-        });
+            socket.emit("check_room_access", roomId, (response) => {
+                // Jeśli serwer się zresetował, response.access będzie false (bo pokój zniknął)
+                if (!response || !response.access) {
+                    console.log("Brak dostępu lub pokój nie istnieje - wyrzucam");
+                    navigate("/", { replace: true });
+                } else {
+                    // Wszystko ok, ładujemy dane
+                    console.log("Dostęp przyznany, dane pobrane");
+                    setGameData(response.game);
+                }
+            });
+        };
+
+        if (socket.connected) {
+            verifyAccess();
+        }
+
+        socket.on("connect", verifyAccess);
+
+        return () => {
+            socket.off("connect", verifyAccess);
+        };
+
     }, [roomId, navigate]);
-
     useEffect(() => {
         const handleUpdateRoom = (gameData) => {
             setGameData(gameData)
