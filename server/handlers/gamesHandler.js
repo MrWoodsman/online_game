@@ -38,7 +38,7 @@ module.exports = (io, socket) => {
     }
   });
 
-  //=== DOŁACZANIE DO POKOIU ===
+  // === DOŁACZANIE DO POKOIU ===
   socket.on("games_join", (roomToJoin, callback) => {
     const userData = connectedUsers[socket.id];
     const gameData = games[roomToJoin];
@@ -113,6 +113,46 @@ module.exports = (io, socket) => {
     io.emit("games_list_update", games);
     // = LOG =
     logger.player(`Dołączono do pokoju ${roomToJoin} | ${userData.nickname} - ${socket.id}`);
+    // = UPDATE ADMIN =
+    brodcastUsersUpdateToAdmin(io);
+  });
+
+  // === TWORZENIE POKOJU ===
+  socket.on("games_create", (data, callback) => {
+    const userData = connectedUsers[socket.id];
+
+    if (!callback) {
+      logger.error("Brak calback w emit('games_create')");
+      return;
+    }
+
+    if (!userData) {
+      logger.error(`Błąd tworzenia pokoju brak danych użytkownika ${socket.id}`);
+      callback({
+        status: "bad",
+        msg: "Błąd danych użytkownika",
+      });
+      return;
+    }
+
+    const roomId = createUniqueId(games);
+    const newGame = createGame();
+    newGame.id = roomId;
+    newGame.ownerId = socket.id; // Użyj specjalnego ID
+    newGame.name = `${connectedUsers[newGame.ownerId]?.nickname}'s room`;
+    newGame.maxPlayers = 4;
+
+    // Dodajemy do bazy
+    games[roomId] = newGame;
+
+    callback({
+      status: "ok",
+      msg: `Pomyślnie utworzono pokój o id: ${roomId}`,
+      room: games[roomId],
+    });
+
+    // = LOG =
+    logger.room(`Utworzono pokój: ${roomId} / Właściciel ${userData?.nickname} - ${socket.id}`);
     // = UPDATE ADMIN =
     brodcastUsersUpdateToAdmin(io);
   });

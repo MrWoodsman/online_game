@@ -80,7 +80,28 @@ export const MainPage = () => {
                         }
                     })
                 }} className="w-full p-4 bg-neutral-200">Join</button>
-                <button className="w-full p-4 bg-neutral-200">Create</button>
+                <button onClick={() => {
+                    socket.emit('games_create', (null), (response) => {
+                        if (!response) return
+
+                        if (response.status == 'bad') { console.error(response.msg) }
+
+                        if (response.status == 'ok') {
+                            console.log('Pomyślnie utworzono', response.room)
+                            // PO UTWORZENIU AUTOMATYCZNE DOŁAACZANIE
+                            socket.emit('games_join', (response.room.id), (response) => {
+                                if (!response) return
+
+                                if (response.status == 'bad') { console.error(response.msg) }
+
+                                if (response.status == 'ok') {
+                                    console.log('Pomyślnie dołączono', response.room)
+                                    navigate(`/room/`, { state: { roomId: response.room.id } })
+                                }
+                            })
+                        }
+                    })
+                }} className="w-full p-4 bg-neutral-200">Create</button>
             </div>
         </div>
     )
