@@ -42,8 +42,8 @@ export const InRoom = () => {
     }, [])
 
     return (
-        <div>
-            <h1>Jesteś w pokoju: {roomId}</h1>
+        <div className="p-4">
+            <h1>Jesteś w pokoju: {gameData ? gameData.name : ""} ({roomId})</h1>
             {
                 gameData && gameData.players.map((player) => (
                     <div key={player.id}>
@@ -51,6 +51,15 @@ export const InRoom = () => {
                     </div>
                 ))
             }
+            <div className="flex gap-4">
+                <button onClick={() => {
+
+                }} className="w-full p-4 bg-neutral-200 cursor-pointer">QUIT</button>
+                <button onClick={() => {
+
+                }} className="w-full p-4 bg-neutral-200 disabled:bg-neutral-100 cursor-not-allowed" disabled>START</button>
+
+            </div>
         </div>
     );
 };

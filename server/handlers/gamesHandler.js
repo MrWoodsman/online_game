@@ -117,6 +117,9 @@ module.exports = (io, socket) => {
     brodcastUsersUpdateToAdmin(io);
   });
 
+  // === OPUSZCZANIE POKOJU
+  socket.on("games_quit", (roomToJoin, callback) => {});
+
   // === TWORZENIE POKOJU ===
   socket.on("games_create", (data, callback) => {
     const userData = connectedUsers[socket.id];
