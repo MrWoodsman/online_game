@@ -16,7 +16,11 @@ module.exports = (io, socket) => {
       const gameId = playerData.gameId;
       const game = games[gameId];
 
-      if (!game) return;
+      if (!game) {
+        logger.error(
+          `Brak danych o grze z której trzeba usunać ${playerData.nickname} - ${socket.id} / id: ${playerData.gameId}`
+        );
+      }
 
       // USUWANIE ZALEZNIE OD STANU GRY
       if (game.status == "LOBBY") {

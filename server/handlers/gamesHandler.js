@@ -142,6 +142,7 @@ module.exports = (io, socket) => {
 
     // 1. Usuwanie użytkownika z pokoju
     roomToQuit.players = roomToQuit.players.filter((p) => p.id !== socket.id);
+    userData.gameId = null;
     // 2. Sprawdzanie czy pokoj jest pusty
     if (roomToQuit.players.length == 0) {
       delete games[roomToQuit.id];
