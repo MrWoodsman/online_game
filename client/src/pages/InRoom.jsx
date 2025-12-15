@@ -47,7 +47,7 @@ export const InRoom = () => {
             {
                 gameData && gameData.players.map((player) => (
                     <div key={player.id}>
-                        <>{player.nickname} {player.id == socket.id ? "(TY)" : ""}</>
+                        <>{gameData.ownerId == player.id ? "👑" : ""} {player.nickname} {player.id == socket.id ? "(TY)" : ""}</>
                     </div>
                 ))
             }
