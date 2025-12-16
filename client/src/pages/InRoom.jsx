@@ -7,6 +7,7 @@ export const InRoom = () => {
     const location = useLocation();
 
     const [gameData, setGameData] = useState()
+    const [roomNameInput, setRoomNameInput] = useState("")
 
     const roomId = location.state?.roomId;
 
@@ -29,6 +30,7 @@ export const InRoom = () => {
                     // Wszystko ok, ładujemy dane
                     console.log("Dostęp przyznany, dane pobrane");
                     setGameData(response.game);
+                    setRoomNameInput(response.game.name)
                 }
             });
         };
@@ -47,6 +49,7 @@ export const InRoom = () => {
     useEffect(() => {
         const handleUpdateRoom = (gameData) => {
             setGameData(gameData)
+            setRoomNameInput(gameData.name)
         }
         socket.on('game_room_update', handleUpdateRoom)
 
@@ -55,9 +58,44 @@ export const InRoom = () => {
         }
     }, [])
 
+    // === UPDATE ROOM NAME ===
+    const serverRoomName = gameData?.name;
+
+    useEffect(() => {
+        if (!roomNameInput || !roomId || !serverRoomName) return;
+
+        // 2. Zabezpieczenie przed pętlą:
+        if (roomNameInput === serverRoomName) return;
+
+        const timer = setTimeout(() => {
+            console.log(`[DEBUG] Wysyłam zmianę: ${roomNameInput} (ID: ${roomId})`);
+
+            socket.emit("games_update_name", {
+                roomId: roomId,
+                newName: roomNameInput
+            });
+
+        }, 1000);
+
+        return () => clearTimeout(timer);
+
+    }, [roomNameInput, roomId, serverRoomName]);
+
     return (
         <div className="p-4">
-            <h1>Jesteś w pokoju: {gameData ? gameData.name : ""} ({roomId})</h1>
+            <h1><span>Jesteś w pokoju: </span>
+                {
+                    gameData?.ownerId == socket.id ? (
+                        <input
+                            value={roomNameInput}
+                            onChange={(e) => { setRoomNameInput(e.target.value) }}
+                            type="text"
+                        />
+                    ) : (
+                        <>{gameData ? gameData.name : ""}</>
+                    )
+                }
+                <span> ({roomId})</span></h1>
             {
                 gameData && gameData.players.map((player) => (
                     <div key={player.id}>

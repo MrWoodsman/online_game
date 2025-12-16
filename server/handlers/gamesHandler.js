@@ -216,6 +216,29 @@ module.exports = (io, socket) => {
     brodcastUsersUpdateToAdmin(io);
   });
 
+  socket.on("games_update_name", (data, callback) => {
+    const game = games[data.roomId];
+
+    if (!game) {
+      logger.error(`Błąd zmiany nazwy pokoju ${data?.roomId} brak danych o pokoju`);
+      return;
+    }
+
+    const nameBefore = game.name;
+
+    game.name = data.newName;
+
+    // = INFORMOWANIE LUDZI W POKOJU
+    io.to(data.roomId).emit("game_room_update", game);
+    // = INFORMOWANIE INNYCH POZA POKOJEM =
+    io.emit("games_list_update", games);
+    // = LOG =
+    logger.room(`Zaktualizowano nazwe ${game.id}: ${nameBefore} -> ${data.newName}`);
+    // = UPDATE ADMIN =
+    brodcastUsersUpdateToAdmin(io);
+  });
+
+  // === SPRAWDZANIE DOSTĘPU ===
   socket.on("check_room_access", (roomId, callback) => {
     const game = games[roomId];
     // Jeśli gry nie ma LUB gracza nie ma na liście tej gry -> return false
