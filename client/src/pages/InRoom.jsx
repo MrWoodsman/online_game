@@ -120,7 +120,7 @@ export const InRoom = () => {
                 }} className="w-full p-4 bg-neutral-200 cursor-pointer">QUIT</button>
                 <button onClick={() => {
 
-                }} className="w-full p-4 bg-neutral-200 disabled:bg-neutral-100 cursor-not-allowed" disabled>START</button>
+                }} className="w-full p-4 bg-neutral-200 cursor-pointer disabled:bg-neutral-100 disabled:cursor-not-allowed" disabled>START</button>
 
             </div>
         </div>

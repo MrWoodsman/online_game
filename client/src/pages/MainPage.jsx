@@ -79,7 +79,7 @@ export const MainPage = () => {
                             navigate(`/room/`, { state: { roomId: response.room.id } })
                         }
                     })
-                }} className="w-full p-4 bg-neutral-200">Join</button>
+                }} className="w-full p-4 bg-neutral-200 cursor-pointer disabled:bg-neutral-100 disabled:cursor-not-allowed" disabled={!selectedRoom}>Join</button>
                 <button onClick={() => {
                     socket.emit('games_create', (null), (response) => {
                         if (!response) return
