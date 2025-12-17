@@ -1,13 +1,16 @@
 import io from "socket.io-client";
 
-const SERVER_PORT = 3001;
+const isDev = import.meta.env.MODE === "development";
 
-const URL = `${window.location.protocol}//${window.location.hostname}:${SERVER_PORT}`;
+const URL = isDev ? "http://localhost:3001" : "https://mrwoodsman.pl";
 
-console.log("Łączenie z serwerem: ", URL);
-
-// Łączymy się z naszym backendem
 const socket = io(URL, {
   autoConnect: true,
+  transports: ["polling"],
+  path: "/boardv2/socket.io/",
+  reconnection: true,
 });
+
+console.log(`[SOCKET SETUP] Connecting to ${URL} with path: /boardv2/socket.io/`);
+
 export default socket;

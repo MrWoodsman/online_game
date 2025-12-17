@@ -10,7 +10,7 @@ import { MainPage } from './pages/MainPage.jsx';
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
-  <BrowserRouter>
+  <BrowserRouter basename='/boardv2'>
     <Routes>
       <Route path='/' element={<MainPage />} />
       <Route path='/admin' element={<AdminPage />} />
