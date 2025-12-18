@@ -17,7 +17,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path: "/boardv2/socket.io",
   cors: {
-    origin: ["https://mrwoodsman.pl", "http://localhost:5173"],
+    origin: ["https://mrwoodsman.pl", "http://localhost:5173", "http://192.168.0.157:5173"],
     methods: ["GET", "POST"],
     transports: ["websocket", "polling"],
     credentials: true,

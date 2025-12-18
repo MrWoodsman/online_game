@@ -71,7 +71,7 @@ const logger = {
     console.log(
       `${colors.dim}[${getTime()}]${colors.reset} ${colors.magenta}${colors.bright}[ADMIN]${
         colors.reset
-      }   ${msg}`
+      }  ${msg}`
     );
   },
 };
