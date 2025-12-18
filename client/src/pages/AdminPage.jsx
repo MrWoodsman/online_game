@@ -111,6 +111,7 @@ export const AdminPage = () => {
                             className="border p-2 rounded focus:outline-blue-500"
                             value={pinInput}
                             onChange={(e) => setPinInput(e.target.value)}
+                            inputMode="numeric"
                             autoFocus
                         />
                         <button type="submit" className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">
