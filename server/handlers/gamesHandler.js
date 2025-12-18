@@ -16,12 +16,12 @@ const initDummyGames = () => {
     newGame.id = roomId;
     newGame.ownerId = "SYSTEM_TEST"; // Użyj specjalnego ID
     newGame.name = `${connectedUsers[newGame.ownerId]?.nickname}'s room`;
-    newGame.maxPlayers = 4;
+    newGame.maxPlayers = 2;
 
     // Dodajemy do bazy
     games[roomId] = newGame;
 
-    logger.room(`[SYSTEM] Utworzono dummy room: ${roomId}`);
+    logger.room(`Utworzono dummy room: ${roomId}`);
   }
 };
 
