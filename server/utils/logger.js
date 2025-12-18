@@ -65,6 +65,15 @@ const logger = {
       }   ${msg}`
     );
   },
+
+  // [ADMIN] - Informacje o rzeczach wykonywanych przez admina
+  admin: (msg) => {
+    console.log(
+      `${colors.dim}[${getTime()}]${colors.reset} ${colors.magenta}${colors.bright}[ADMIN]${
+        colors.reset
+      }   ${msg}`
+    );
+  },
 };
 
 module.exports = logger;

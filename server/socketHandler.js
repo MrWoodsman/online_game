@@ -6,6 +6,7 @@ const disconnectHandler = require("./handlers/disconnectHandler");
 const connectionHandler = require("./handlers/connectionHandler");
 const usersHandler = require("./handlers/usersHandler");
 const gamesHandler = require("./handlers/gamesHandler");
+const adminHanlder = require("./handlers/adminHanlder");
 
 module.exports = (io) => {
   io.on("connection", (socket) => {
@@ -13,6 +14,7 @@ module.exports = (io) => {
     disconnectHandler(io, socket);
     usersHandler(io, socket);
     gamesHandler(io, socket);
+    adminHanlder(io, socket);
   });
 };
 

@@ -10,6 +10,7 @@ const createPlayerInGame = (id, nickname) => ({
   id: id,
   nickname: nickname,
   color: null,
+  isConnected: true,
 });
 
 // Model Gry
