@@ -2,7 +2,9 @@ import io from "socket.io-client";
 
 const isDev = import.meta.env.MODE === "development";
 
-const URL = isDev ? "http://localhost:3001" : "https://mrwoodsman.pl";
+// ZMIANA: Używamy window.location.hostname zamiast "localhost"
+// Dzięki temu zadziała i na kompie (localhost) i na telefonie (192.168.x.x)
+const URL = isDev ? `http://${window.location.hostname}:3001` : "https://mrwoodsman.pl";
 
 const socket = io(URL, {
   autoConnect: true,
