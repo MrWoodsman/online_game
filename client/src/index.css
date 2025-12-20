@@ -19,3 +19,78 @@
   width: 100%;
   height: 100dvh;
 }
+
+.background-patern {
+  background: url("./assets/background.png");
+  background-size: 250px;
+  background-position: -20% -50%;
+}
+
+/* index.css */
+
+html,
+body,    /* <--- Dodałem body, żeby nie przerwać łańcucha wysokości */
+#root,
+.App {
+  height: 100dvh; /* Idealna wysokość na mobile */
+  width: 100%;
+  margin: 0; /* Reset marginesów przeglądarki */
+
+  overflow: hidden; /* Blokuje scrollowanie całej strony */
+
+  /* === TO JEST KLUCZ DLA IOS (iPhonów) === */
+  overscroll-behavior: none; /* Wyłącza efekt "gumki/odbijania" przy przewijaniu końca strony */
+}
+
+html,
+body {
+  /* 1. KOLOR ZABEZPIECZAJĄCY (BARDZO WAŻNE) */
+  /* Ustaw tu średni kolor swojego obrazka (np. ten beżowy) */
+  /* Dzięki temu paski systemowe będą miały kolor nawet jak obrazek się jeszcze nie wczytał */
+  background-color: #f0eadd;
+
+  /* 2. OBRAZEK Z FOLDERU PUBLIC */
+  /* Zauważ brak kropki na początku! */
+  background-image: url("/assets/background.png");
+
+  /* 3. USTAWIENIA TAPETY */
+  background-repeat: repeat; /* Żeby się powtarzał (kafelkowanie) */
+  background-size: 250px; /* Rozmiar jednego kafelka */
+  background-position: center top;
+
+  /* 4. TECHNICZNE (ZOSTAWIAMY JAK MIAŁEŚ) */
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* index.css */
+html,
+body {
+  /* ZAMIAST background-image tutaj, użyj go w #root albo .App, */
+  /* ale kolor tła zostaw tutaj jako fallback */
+  background-color: #f0eadd;
+
+  /* KLUCZOWE: To sprawia, że strona jest "przyklejona" do ekranu */
+  /* Nie może się przesunąć pod klawiaturą */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 100%; /* fixed odnosi się do okna, więc 100% zadziała stabilnie */
+
+  overflow: hidden; /* Zero scrollowania na poziomie body */
+  overscroll-behavior: none;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}

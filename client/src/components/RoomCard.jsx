@@ -1,45 +1,69 @@
+import { Container3D } from "./design/Container3D";
+
 export const RoomCard = ({ room, isSelected, onSelect }) => {
 
     // 1. Sprawdzamy czy pokój jest pełny
-    const isFull = room.players.length >= room.maxPlayers;
+    const isFull = room.players?.length >= room.maxPlayers;
 
-    // 2. Określamy aktualny stan (priorytet: Full > Selected > Default)
-    let state = 'default';
-    if (isFull) {
-        state = 'full';
-    } else if (isSelected) {
-        state = 'selected';
-    }
-
-    // 3. Definicje stylów dla każdego stanu
-    const styles = {
-        default: "bg-white border-transparent hover:border-green-200 hover:shadow-md cursor-pointer text-neutral-800",
-        selected: "bg-blue-50 border-blue-500 shadow-md cursor-pointer text-blue-900",
-        full: "bg-neutral-50 border-neutral-200 text-neutral-400 cursor-not-allowed opacity-70"
+    const Container3DStyles = {
+        default: {
+            color: "#E5E5E5", // Jasny szary
+            shadow: "#A3A3A3", // Ciemny szary (cień)
+        },
+        selected: {
+            color: "#60A5FA", // Niebieski (Tailwind blue-400)
+            shadow: "#2563EB", // Ciemny niebieski (Tailwind blue-600)
+        },
+        full: {
+            color: "#FDBA74", // Pomarańczowy
+            shadow: "#EA580C", // Ciemny pomarańczowy
+        }
     };
 
-    return (
-        <div
-            // 4. Obsługa kliknięcia: jeśli pełny, nie rób nic
-            onClick={() => !isFull && onSelect(room.id)}
-            className={`
-                p-3 rounded-md border-2 transition-all duration-200 flex justify-between items-center 
-                ${styles[state]}
-            `}
-        >
-            <div className="flex flex-col">
-                <span className="font-semibold">
-                    {room.name} {room.id}
-                </span>
-                {/* Opcjonalnie: Dodatkowy tekst informacyjny */}
-                {/* {state === 'full' && <span className="text-xs text-red-400 font-bold">PEŁNY</span>}
-                {state === 'selected' && <span className="text-xs text-green-600 font-bold">WYBRANY</span>} */}
-            </div>
+    const variantKey = isSelected ? 'selected' : (isFull ? 'full' : 'default');
+    const activeStyle = Container3DStyles[variantKey];
 
-            {/* Licznik graczy */}
-            <span className={`font-mono font-bold ${isFull ? "text-neutral-400" : ""}`}>
-                {room.players.length}/{room.maxPlayers}
-            </span>
-        </div>
+    return (
+        <Container3D
+            color={activeStyle.color}
+            shadow={activeStyle.shadow}
+            textColor="black"
+            className="mt-[-5px]"
+        >
+            <div className="flex w-full justify-between cursor-pointer" onClick={() => !isFull && onSelect(room.id)}>
+                <span className="font-semibold text-left">
+                    {room.name}
+                    {/* {room.id} */}
+                </span>
+                <span className={`font-mono font-bold`}>
+                    {room.players?.length}/{room.maxPlayers}
+                </span>
+            </div>
+        </Container3D>
     )
+
+    // return (
+    //     <div
+    //         // 4. Obsługa kliknięcia: jeśli pełny, nie rób nic
+    //         onClick={() => !isFull && onSelect(room.id)}
+    //         className={`
+    //             p-3 rounded-md border-2 transition-all duration-200 flex justify-between items-center 
+    //             ${styles[state]}
+    //         `}
+    //     >
+    //         <div className="flex flex-col">
+    //             <span className="font-semibold">
+    //                 {room.name} {room.id}
+    //             </span>
+    //             {/* Opcjonalnie: Dodatkowy tekst informacyjny */}
+    //             {/* {state === 'full' && <span className="text-xs text-red-400 font-bold">PEŁNY</span>}
+    //             {state === 'selected' && <span className="text-xs text-green-600 font-bold">WYBRANY</span>} */}
+    //         </div>
+
+    //         {/* Licznik graczy */}
+    //         <span className={`font-mono font-bold ${isFull ? "text-neutral-400" : ""}`}>
+    //             {room.players.length}/{room.maxPlayers}
+    //         </span>
+    //     </div>
+    // )
 }
